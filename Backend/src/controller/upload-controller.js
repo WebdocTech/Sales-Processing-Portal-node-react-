@@ -5,9 +5,7 @@ import queue from "../services/queue-services.js";
 export const uploadAndProcess = async (req, res, next) => {
   try {
     const { service_api_id, center, service_api_key } = req.body;
-    // const filePath = req.file.path;
-    // console.log(req.file, "File path:", filePath);
-    const filePath = "uploads\\1767933997644-upload_sales_Cybrid_HI.xlsx";
+    const filePath = req.file.path;
     const rows = await readExcel(filePath);
 
     for (const row of rows) {
@@ -18,7 +16,6 @@ export const uploadAndProcess = async (req, res, next) => {
         center,
         filePath,
         filename: filePath,
-        service_api_id,
         total_count: rows.length,
       };
 
