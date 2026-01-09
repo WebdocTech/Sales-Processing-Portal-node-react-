@@ -1,0 +1,22 @@
+{
+  "name": "reporting-portal-backend",
+  "version": "1.0.0",
+  "description": "Backend Portal for processing the Sales File",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.16.0",
+    "nodemon": "^3.1.11",
+    "p-queue": "^9.1.0"
+  }
+}
