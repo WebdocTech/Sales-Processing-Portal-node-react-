@@ -1,6 +1,10 @@
-import { createCompany, findCompanyByName } from "../models/companies-model.js";
+import {
+  createCompany,
+  findCompanyByName,
+  getAllCompanies,
+} from "../models/companies-model.js";
 
-export const createCompanyController = async (req, res, next) => {
+export const createCompanyController = async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -30,6 +34,23 @@ export const createCompanyController = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false,
+      error: error,
+    });
+  }
+};
+export const getCompanies = async (req, res) => {
+  try {
+    const companies = await getAllCompanies();
+    res.status(200).json({
+      success: true,
+      data: companies,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error,
+    });
   }
 };

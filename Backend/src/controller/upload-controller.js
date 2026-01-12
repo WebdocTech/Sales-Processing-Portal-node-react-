@@ -38,10 +38,9 @@ import {
   createSalesUpload,
   incrementProcessedCount,
   markUploadCompleted,
-  markUploadFailed,
 } from "../models/sales-upload-model.js";
 import pool from "../config/db.js";
-export const uploadAndProcess = async (req, res, next) => {
+export const uploadAndProcess = async (req, res) => {
   try {
     const { service_id, service_api_id, center, service_api_key } = req.body;
     const filePath = req.file.path;
@@ -97,6 +96,9 @@ export const uploadAndProcess = async (req, res, next) => {
       message: "File processing started",
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false,
+      error: error,
+    });
   }
 };
