@@ -59,8 +59,7 @@ export default function UploadFilePage() {
     const selectedService = services.find(
       (service) => service.id === Number(serviceId)
     );
-    console.log(serviceId, center);
-    return;
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("center", center);
@@ -71,9 +70,6 @@ export default function UploadFilePage() {
       setIsUploading(true);
 
       const response = await fetch(`${BASE_URL}/upload`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
         method: "POST",
         body: formData,
       });

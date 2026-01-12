@@ -5,15 +5,7 @@ export async function subscribeAndCharge(
   service_api_key,
   service_api_id
 ) {
-  console.log(
-    "Queueing API call for payload:",
-    payload,
-    service_api_key,
-    service_api_id
-  );
-
   const msisdn = `0${payload.msisdn}`;
-
   const subscribeRequest = {
     cellno: msisdn,
     subMode: "WEB",

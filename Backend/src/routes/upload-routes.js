@@ -8,5 +8,5 @@ import {
 const router = Router();
 
 router.post("/", upload.single("file"), uploadAndProcess);
-router.get("/center", getUploadsByCenter);
+router.get("/", getUploadsByCenter);
 export default router;

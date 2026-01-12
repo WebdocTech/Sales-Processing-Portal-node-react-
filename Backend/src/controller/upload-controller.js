@@ -67,7 +67,6 @@ export const uploadAndProcess = async (req, res) => {
           campaign_id: row[2],
           center,
         };
-        console.log(`Created upload payload : `, payload);
 
         const success = await subscribeAndCharge(
           payload,
@@ -97,6 +96,7 @@ export const uploadAndProcess = async (req, res) => {
       message: "File processing started",
     });
   } catch (error) {
+    console.error("Upload and process error:", error);
     return res.status(500).json({
       success: false,
       error: error,
