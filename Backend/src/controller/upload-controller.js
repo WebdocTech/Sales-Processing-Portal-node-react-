@@ -38,6 +38,7 @@ import {
   createSalesUpload,
   incrementProcessedCount,
   markUploadCompleted,
+  getUploadByCenter,
 } from "../models/sales-upload-model.js";
 import pool from "../config/db.js";
 export const uploadAndProcess = async (req, res) => {
@@ -94,6 +95,22 @@ export const uploadAndProcess = async (req, res) => {
       uploadId,
       totalRecords: rows.length,
       message: "File processing started",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error,
+    });
+  }
+};
+export const getUploadsByCenter = async (req, res) => {
+  try {
+    const { center } = req.query;
+    const uploads = await getUploadByCenter(center);
+
+    res.json({
+      success: true,
+      uploads,
     });
   } catch (error) {
     return res.status(500).json({

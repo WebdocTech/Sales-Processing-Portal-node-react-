@@ -1,13 +1,18 @@
 import { UploadCloud, FileText, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRef } from "react";
 import toast from "react-hot-toast";
+import { getAllCompanies, getAllServices } from "../../helpers/apis-helper";
+import { BASE_URL } from "../../config";
 
 export default function UploadFilePage() {
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [serviceName, setServiceName] = useState("");
+  const [serviceId, setserviceId] = useState();
   const [companyId, setCompanyId] = useState("");
+  const [center, setCenter] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const [services, setServices] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
   const handleDrop = (e) => {
@@ -35,7 +40,7 @@ export default function UploadFilePage() {
   };
 
   const handleUpload = async () => {
-    if (!serviceName) {
+    if (!serviceId) {
       toast.error("Please select a service before uploading.");
       return;
     }
@@ -43,38 +48,42 @@ export default function UploadFilePage() {
       toast.error("Please select a company.");
       return;
     }
-
+    if (!center) {
+      toast.error("Please select a call center.");
+      return;
+    }
     if (!file) {
       toast.error("Please select a file first.");
       return;
     }
-    const serviceIdMap = {
-      API_MIS: "3",
-      API_HIS: "4",
-    };
+    const selectedService = services.find(
+      (service) => service.id === Number(serviceId)
+    );
+    console.log(serviceId, center);
+    return;
     const formData = new FormData();
-    formData.append("user_id", companyId); // adjust as needed, maybe dynamic user
     formData.append("file", file);
-    formData.append("service_name", serviceName);
-    formData.append("service_id", serviceIdMap[serviceName]);
-
+    formData.append("center", center);
+    formData.append("service_api_id", selectedService.service_api_id);
+    formData.append("service_api_key", selectedService.service_api_key);
+    formData.append("service_id", serviceId);
     try {
       setIsUploading(true);
 
-      const response = await fetch(
-        "https://digital.webdoc.com.pk/Promotion/api/upload-file",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${BASE_URL}/upload`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
 
       if (response.ok) {
         toast.success("File uploaded successfully!");
         setFile(null);
-        setServiceName("");
+        setserviceId();
         console.log("Upload response:", data);
       } else {
         toast.error(data.message || "Upload failed. Try again.");
@@ -92,7 +101,35 @@ export default function UploadFilePage() {
   };
 
   const clearFile = () => setFile(null);
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const response = await getAllCompanies();
+      console.log("Companies fetched:", response);
+      if (response.success) {
+        setCompanies(response.data);
+      } else {
+        toast.error("Failed to fetch companies ");
+      }
+    };
+    fetchCompanies();
+  }, []);
 
+  const fetchServices = useCallback(async (id) => {
+    const response = await getAllServices(id);
+    console.log("Services fetched:", response);
+    if (response.success) {
+      setServices(response.data);
+    } else {
+      toast.error("Failed to fetch services");
+    }
+  }, []);
+  useEffect(() => {
+    if (companyId) {
+      fetchServices(companyId);
+    } else {
+      setServices([]);
+    }
+  }, [companyId]);
   return (
     <div className="flex-1 p-8">
       <h1 className="text-3xl font-semibold text-gray-800 mb-8">
@@ -111,8 +148,13 @@ export default function UploadFilePage() {
             className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
           >
             <option value="">-- Choose a company --</option>
-            <option value="4">Telo</option>
-            <option value="1">Sybrid</option>
+            {/* <option value="4">Telo</option>
+            <option value="1">Sybrid</option> */}
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+              </option>
+            ))}
           </select>
         </div>
         <div className="mb-6">
@@ -120,17 +162,32 @@ export default function UploadFilePage() {
             Select Service
           </label>
           <select
-            value={serviceName}
-            onChange={(e) => setServiceName(e.target.value)}
+            value={serviceId}
+            onChange={(e) => setserviceId(e.target.value)}
             className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
           >
             <option value="">-- Choose a service --</option>
-            <option value="API_MIS">Zong MIS</option>
-            <option value="API_HIS">Zong HIS</option>
-            <option value="API_HBS">Zong HBS</option>
+            {services.map((service) => (
+              <option key={service.id} value={service.id}>
+                {service.name}
+              </option>
+            ))}
           </select>
         </div>
-
+        <div className="mb-6">
+          <label className="block mb-2 font-medium text-gray-700">
+            Select Center
+          </label>
+          <select
+            value={center}
+            onChange={(e) => setCenter(e.target.value)}
+            className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
+          >
+            <option value="">-- Choose Call center --</option>
+            <option value="Telo">Telo</option>
+            <option value="Sybrid">Sybrid</option>
+          </select>
+        </div>
         {/* Drop Zone */}
         <div
           className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition duration-300 ${
@@ -187,9 +244,9 @@ export default function UploadFilePage() {
         <div className="mt-8">
           <button
             onClick={handleUpload}
-            disabled={!file || !serviceName || !companyId || isUploading}
+            disabled={!file || !serviceId || !companyId || isUploading}
             className={`w-full py-3 cursor-pointer rounded-lg text-white font-semibold transition duration-300 ${
-              file && serviceName && companyId
+              file && serviceId && companyId
                 ? "bg-teal-500 hover:bg-teal-600 shadow-md"
                 : "bg-gray-300 cursor-not-allowed"
             }`}

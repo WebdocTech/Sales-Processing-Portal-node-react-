@@ -31,9 +31,16 @@ export const findServiceByNameAndCompany = async (
 };
 export const findServiceByCompany = async (company_id) => {
   const [rows] = await pool.query(
-    `SELECT * FROM services 
-     WHERE company_id = ?
-     LIMIT 1`,
+    `SELECT 
+      id,
+      name,
+      service_api_key,
+      service_api_id,
+      created_at
+    FROM services
+    WHERE company_id = ?
+    ORDER BY created_at DESC
+     LIMIT 100`,
     [company_id]
   );
   return rows;

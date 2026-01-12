@@ -53,3 +53,15 @@ export async function markUploadFailed(uploadId) {
     [uploadId]
   );
 }
+
+export async function getUploadByCenter(center) {
+  const [rows] = await pool.query(
+    `
+    SELECT *
+    FROM sales_uploads
+    WHERE center = ?
+    `,
+    [center]
+  );
+  return rows;
+}

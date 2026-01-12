@@ -1,9 +1,12 @@
 import { Router } from "express";
 import upload from "../middlewares/upload-middleware.js";
-import { uploadAndProcess } from "../controller/upload-controller.js";
+import {
+  uploadAndProcess,
+  getUploadsByCenter,
+} from "../controller/upload-controller.js";
 
 const router = Router();
 
 router.post("/", upload.single("file"), uploadAndProcess);
-
+router.get("/center", getUploadsByCenter);
 export default router;
