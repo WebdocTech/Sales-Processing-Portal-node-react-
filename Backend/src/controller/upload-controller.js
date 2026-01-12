@@ -84,7 +84,6 @@ export const uploadAndProcess = async (req, res) => {
 
         if (rowsCount[0].processed_count === rowsCount[0].total_count) {
           await markUploadCompleted(uploadId);
-          fs.unlinkSync(filePath); // delete file
         }
       });
     });
