@@ -22,20 +22,18 @@ export default function Login() {
         password,
       };
 
-      const response = await fetch(`${BASE_URL}/Promotion/auth/login`, {
+      const response = await fetch(`${BASE_URL}/user/login`, {
         method: "POST",
-        // headers: {
-        //   "Content-Type": "application/json",
-        // },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
       console.log("Login Response:", data);
-
-      if (data?.status === true) {
-        toast.success("Login Successful");
-        sessionStorage.setItem("user", JSON.stringify(data));
+      if (data?.success === true) {
+        sessionStorage.setItem("user", JSON.stringify(data.data));
         navigate("/dashboard");
       } else {
         setErrorMessage(data?.message || "Invalid credentials");
