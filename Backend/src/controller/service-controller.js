@@ -1,10 +1,11 @@
 import {
   createService,
   findServiceByNameAndCompany,
+  findServiceByCompany,
   companyExists,
 } from "../models/services-model.js";
 
-export const createServiceController = async (req, res, next) => {
+export const createServiceController = async (req, res) => {
   try {
     const { name, service_api_key, service_api_id, company_id } = req.body;
 
@@ -55,6 +56,36 @@ export const createServiceController = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false,
+      error: error,
+    });
+  }
+};
+export const getServiceByCompanyController = async (req, res) => {
+  try {
+    const { company_id } = req.query;
+    if (!company_id) {
+      return res.status(400).json({
+        success: false,
+        message: "company_id is required",
+      });
+    }
+    const service = await findServiceByCompany(company_id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found for this company",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: service,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error,
+    });
   }
 };

@@ -29,6 +29,22 @@ export const findServiceByNameAndCompany = async (
   );
   return rows[0];
 };
+export const findServiceByCompany = async (company_id) => {
+  const [rows] = await pool.query(
+    `SELECT 
+      id,
+      name,
+      service_api_key,
+      service_api_id,
+      created_at
+    FROM services
+    WHERE company_id = ?
+    ORDER BY created_at DESC
+     LIMIT 100`,
+    [company_id]
+  );
+  return rows;
+};
 
 export const companyExists = async (company_id) => {
   const [rows] = await pool.query(

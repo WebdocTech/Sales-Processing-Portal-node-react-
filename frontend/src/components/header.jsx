@@ -12,7 +12,7 @@ export default function ProfileHeader() {
     if (!userData) {
       navigate("/");
     } else {
-      setUserName(userData.data.name);
+      setUserName(userData.name);
     }
   }, []);
 

@@ -14,3 +14,7 @@ export const findCompanyByName = async (name) => {
   );
   return rows[0];
 };
+export const getAllCompanies = async () => {
+  const [rows] = await pool.query("SELECT id, name FROM companies");
+  return rows;
+};
