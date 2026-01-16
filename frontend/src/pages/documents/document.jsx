@@ -17,7 +17,6 @@ export default function UploadedFilesPage() {
   const [companyId, setCompanyId] = useState("");
   const [center, setCenter] = useState("");
   const [initial, setInitial] = useState(true); // to prevent auto-fetch on first load
-  const [processingFiles, setProcessingFiles] = useState([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -176,15 +175,24 @@ export default function UploadedFilesPage() {
 
   return (
     <div className="">
-      <h1 className="text-3xl gap-3 flex items-center font-semibold text-gray-800 mb-4">
-        <FileText className="w-8 h-8 text-teal-100" />
-        Uploaded Files
-      </h1>
-
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-3xl gap-3 flex items-center font-semibold text-gray-800 mb-4">
+          <FileText className="w-8 h-8 text-teal-100" />
+          Uploaded Files
+        </h1>
+        {center && (
+          <button
+            onClick={fetchFiles}
+            className="bg-teal-100 text-black cursor-pointer font-semibold px-6 py-2 rounded-md"
+          >
+            Refresh
+          </button>
+        )}
+      </div>
       {/* Company Selection */}
       <div className="mb-6">
         <label className="block mb-2 font-medium text-gray-700">
-          Select Company
+          Select Center
         </label>
         <select
           value={companyId}
