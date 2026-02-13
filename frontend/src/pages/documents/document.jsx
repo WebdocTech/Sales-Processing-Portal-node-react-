@@ -205,6 +205,7 @@ export default function UploadedFilesPage() {
           <option value="">-- Choose Call Center --</option>
           <option value="Telo">Telo</option>
           <option value="Sybrid">Sybrid</option>
+          <option value="Whatsapp">Whatsapp</option>
         </select>
       </div>
 

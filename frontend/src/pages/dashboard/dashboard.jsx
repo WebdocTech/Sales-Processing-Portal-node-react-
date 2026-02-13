@@ -57,7 +57,7 @@ export default function UploadFilePage() {
       return;
     }
     const selectedService = services.find(
-      (service) => service.id === Number(serviceId)
+      (service) => service.id === Number(serviceId),
     );
 
     const formData = new FormData();
@@ -182,6 +182,7 @@ export default function UploadFilePage() {
             <option value="">-- Choose Call center --</option>
             <option value="Telo">Telo</option>
             <option value="Sybrid">Sybrid</option>
+            <option value="Whatsapp">Whatsapp</option>
           </select>
         </div>
         {/* Drop Zone */}
