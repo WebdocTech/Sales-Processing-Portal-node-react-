@@ -10,14 +10,13 @@ import {
   Loader,
 } from "lucide-react";
 import { formatTo12Hour } from "../../helpers/date-formatter";
-
+import { BASE_URL } from "../../config";
 export default function UploadedFilesPage() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [companyId, setCompanyId] = useState("");
   const [center, setCenter] = useState("");
   const [initial, setInitial] = useState(true); // to prevent auto-fetch on first load
-  const [processingFiles, setProcessingFiles] = useState([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,22 +31,13 @@ export default function UploadedFilesPage() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `https://digital.webdoc.com.pk/Promotion/api/user-files/${companyId}`
-      );
-
-      // Validate network response
-      if (!response.ok) {
-        toast.error("Network error while fetching files");
-        setLoading(false);
-        return;
-      }
+      const response = await fetch(`${BASE_URL}/upload?center=${companyId}`);
 
       const data = await response.json();
 
-      if (data.status) {
-        const sorted = data.data.sort((a, b) => {
-          return new Date(b.created_at) - new Date(a.created_at); // latest first
+      if (data.success) {
+        const sorted = data.uploads.sort((a, b) => {
+          return new Date(b.uploaded_at) - new Date(a.uploaded_at); // latest first
         });
         setFiles(sorted);
         setCurrentPage(1); // Reset to first page when new data loads
@@ -100,11 +90,11 @@ export default function UploadedFilesPage() {
   const getServiceName = (serviceid) => {
     switch (serviceid) {
       case "API_MIS":
-        return "Zong MIS";
+        return "MIS";
       case "API_HIS":
-        return "Zong HIS";
+        return "HIS";
       case "API_HBS":
-        return "Zong HBS";
+        return "HBS";
       default:
         return "Unknown";
     }
@@ -118,50 +108,50 @@ export default function UploadedFilesPage() {
         return (
           <CircleCheck className="w-5 h-5 text-white bg-green-600 rounded-full" />
         );
-      case "inprogress":
+      case "processing":
         return <Loader className="w-5 h-5 text-blue-800 animate-spin" />;
       default:
         return null;
     }
   };
 
-  const handleFileProcessing = async (file) => {
-    if (!center) {
-      toast.error("Please select a center before starting the process.");
-      return;
-    }
+  // const handleFileProcessing = async (file) => {
+  //   if (!center) {
+  //     toast.error("Please select a center before starting the process.");
+  //     return;
+  //   }
 
-    const apiUrl = `https://digital.webdoc.com.pk/Promotion/api/process-file/${
-      file.id
-    }/${file.serviceid}?center_name=${encodeURIComponent(center)}`;
+  //   const apiUrl = `https://digital.webdoc.com.pk/Promotion/api/process-file/${
+  //     file.id
+  //   }/${file.serviceid}?center_name=${encodeURIComponent(center)}`;
 
-    try {
-      setProcessingFiles((prev) => [...prev, file.id]);
-      const response = await fetch(apiUrl, {
-        method: "GET", // Assuming it's a GET request
-      });
-      const data = await response.json();
+  //   try {
+  //     setProcessingFiles((prev) => [...prev, file.id]);
+  //     const response = await fetch(apiUrl, {
+  //       method: "GET", // Assuming it's a GET request
+  //     });
+  //     const data = await response.json();
 
-      if (response.ok) {
-        toast.success(`File ${file.filename} processing completed!`);
-        console.log("Processing response:", data);
-        fetchFiles();
-      } else {
-        toast.error(
-          data.message || `Failed to start processing ${file.filename}`
-        );
-        console.error("Processing error:", data);
-      }
-    } catch (err) {
-      toast.error("Something went wrong during file processing.", {
-        id: "process",
-      });
-      console.error(err);
-    } finally {
-      // Remove file.id from processingFiles
-      setProcessingFiles((prev) => prev.filter((id) => id !== file.id));
-    }
-  };
+  //     if (response.ok) {
+  //       toast.success(`File ${file.filename} processing completed!`);
+  //       console.log("Processing response:", data);
+  //       fetchFiles();
+  //     } else {
+  //       toast.error(
+  //         data.message || `Failed to start processing ${file.filename}`
+  //       );
+  //       console.error("Processing error:", data);
+  //     }
+  //   } catch (err) {
+  //     toast.error("Something went wrong during file processing.", {
+  //       id: "process",
+  //     });
+  //     console.error(err);
+  //   } finally {
+  //     // Remove file.id from processingFiles
+  //     setProcessingFiles((prev) => prev.filter((id) => id !== file.id));
+  //   }
+  // };
 
   // Generate page numbers for pagination
   const getPageNumbers = () => {
@@ -185,15 +175,24 @@ export default function UploadedFilesPage() {
 
   return (
     <div className="">
-      <h1 className="text-3xl gap-3 flex items-center font-semibold text-gray-800 mb-4">
-        <FileText className="w-8 h-8 text-teal-100" />
-        Uploaded Files
-      </h1>
-
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-3xl gap-3 flex items-center font-semibold text-gray-800 mb-4">
+          <FileText className="w-8 h-8 text-teal-100" />
+          Uploaded Files
+        </h1>
+        {center && (
+          <button
+            onClick={fetchFiles}
+            className="bg-teal-100 text-black cursor-pointer font-semibold px-6 py-2 rounded-md"
+          >
+            Refresh
+          </button>
+        )}
+      </div>
       {/* Company Selection */}
       <div className="mb-6">
         <label className="block mb-2 font-medium text-gray-700">
-          Select Company
+          Select Center
         </label>
         <select
           value={companyId}
@@ -203,9 +202,10 @@ export default function UploadedFilesPage() {
           }}
           className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
         >
-          <option value="">-- Choose a company --</option>
-          <option value="4">Telo</option>
-          <option value="1">Sybrid</option>
+          <option value="">-- Choose Call Center --</option>
+          <option value="Telo">Telo</option>
+          <option value="Sybrid">Sybrid</option>
+          <option value="Whatsapp">Whatsapp</option>
         </select>
       </div>
 
@@ -242,22 +242,19 @@ export default function UploadedFilesPage() {
                   <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
                     Processed Count
                   </th>
-                  <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
-                    Action
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentFiles.map((file) => (
                   <tr key={file.id} className="hover:bg-gray-50 transition">
                     <td className="p-3 md:px-4 md:py-3 text-xs md:text-md xl:text-base text-center text-gray-700">
-                      {getServiceName(file.serviceid)}
+                      {getServiceName(file.service_api_key)}
                     </td>
                     <td className="p-3 md:px-4 md:py-3 text-xs md:text-md xl:text-base text-center text-gray-700">
-                      {formatTo12Hour(file.created_at)}
+                      {formatTo12Hour(file.uploaded_at)}
                     </td>
                     <td className="p-3 md:px-4 md:py-3 text-xs md:text-md xl:text-base text-center text-gray-700">
-                      {formatTo12Hour(file.completion_at)}
+                      {formatTo12Hour(file.completed_at)}
                     </td>
                     <td className="p-3 md:px-4 md:py-3 text-xs md:text-md xl:text-base">
                       <div className="flex items-center justify-center gap-1">
@@ -270,37 +267,6 @@ export default function UploadedFilesPage() {
                     </td>
                     <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
                       {file.processed_count}
-                    </td>
-                    <td className="p-3 md:px-4 md:py-3 flex items-center justify-center gap-1">
-                      {file.status === "Completed" ? (
-                        <span className="px-2 py-1 bg-green-100 text-green-700 outline outline-green-200 text-xs xl:text-md font-medium rounded-lg flex items-center gap-1">
-                          File Processed
-                        </span>
-                      ) : (
-                        <button
-                          disabled={
-                            processingFiles.includes(file.id) ||
-                            file.status === "InProgress"
-                          }
-                          onClick={() => handleFileProcessing(file)}
-                          className={`px-2 py-1 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-                            processingFiles.includes(file.id) ||
-                            file.status === "InProgress"
-                              ? "bg-blue-500 text-gray-50 cursor-not-allowed text-xs"
-                              : "bg-gray-100 text-teal-700 font-semibold text-xs text-start md:text-md outline cursor-pointer outline-teal-100"
-                          }`}
-                        >
-                          {processingFiles.includes(file.id) ||
-                          file.status === "InProgress" ? (
-                            <>
-                              Processing
-                              <Ellipsis className="w-4 h-4 animate-pulse" />
-                            </>
-                          ) : (
-                            "Start Process"
-                          )}
-                        </button>
-                      )}
                     </td>
                   </tr>
                 ))}

@@ -67,7 +67,6 @@ export const uploadAndProcess = async (req, res) => {
           campaign_id: row[2],
           center,
         };
-        console.log(`Created upload payload : `, payload);
 
         const success = await subscribeAndCharge(
           payload,
@@ -85,7 +84,6 @@ export const uploadAndProcess = async (req, res) => {
 
         if (rowsCount[0].processed_count === rowsCount[0].total_count) {
           await markUploadCompleted(uploadId);
-          fs.unlinkSync(filePath); // delete file
         }
       });
     });
@@ -97,6 +95,7 @@ export const uploadAndProcess = async (req, res) => {
       message: "File processing started",
     });
   } catch (error) {
+    console.error("Upload and process error:", error);
     return res.status(500).json({
       success: false,
       error: error,

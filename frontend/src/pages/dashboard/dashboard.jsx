@@ -57,10 +57,9 @@ export default function UploadFilePage() {
       return;
     }
     const selectedService = services.find(
-      (service) => service.id === Number(serviceId)
+      (service) => service.id === Number(serviceId),
     );
-    console.log(serviceId, center);
-    return;
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("center", center);
@@ -71,9 +70,6 @@ export default function UploadFilePage() {
       setIsUploading(true);
 
       const response = await fetch(`${BASE_URL}/upload`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
         method: "POST",
         body: formData,
       });
@@ -186,6 +182,14 @@ export default function UploadFilePage() {
             <option value="">-- Choose Call center --</option>
             <option value="Telo">Telo</option>
             <option value="Sybrid">Sybrid</option>
+            <option value="Whatsapp">Whatsapp</option>
+            {/* Conditional centers for Ufone */}
+            {companies.find((c) => c.id == companyId)?.name === "Ufone" && (
+              <>
+                <option value="Technologist">Technologist</option>
+                <option value="Apexsolutions">Apexsolutions</option>
+              </>
+            )}
           </select>
         </div>
         {/* Drop Zone */}

@@ -3,17 +3,9 @@ import { saveApiLog } from "./api-logs-service.js";
 export async function subscribeAndCharge(
   payload,
   service_api_key,
-  service_api_id
+  service_api_id,
 ) {
-  console.log(
-    "Queueing API call for payload:",
-    payload,
-    service_api_key,
-    service_api_id
-  );
-
   const msisdn = `0${payload.msisdn}`;
-
   const subscribeRequest = {
     cellno: msisdn,
     subMode: "WEB",
@@ -29,7 +21,7 @@ export async function subscribeAndCharge(
       {
         params: subscribeRequest,
         timeout: 60000,
-      }
+      },
     );
 
     // 🔹 LOG SUBSCRIBE RESPONSE
@@ -46,23 +38,34 @@ export async function subscribeAndCharge(
       subscribeResponse.data.IS_SUBSCRIBED === "Y"
     ) {
       const chargingRequest = { cellno: msisdn };
+      try {
+        const chargingResponse = await axios.get(
+          `${process.env.THIRD_PARTY_API}/${service_api_key}/charging`,
+          {
+            params: chargingRequest,
+            timeout: 60000,
+          },
+        );
 
-      const chargingResponse = await axios.get(
-        `${process.env.THIRD_PARTY_API}/${service_api_id}/charging`,
-        {
-          params: chargingRequest,
-          timeout: 60000,
-        }
-      );
-
-      // 🔹 LOG CHARGING RESPONSE
-      await saveApiLog({
-        apiName: "CallCenter-Charging",
-        msisdn,
-        requestPayload: chargingRequest,
-        responsePayload: chargingResponse.data,
-        serviceKey: service_api_key,
-      });
+        await saveApiLog({
+          apiName: "CallCenter-Charging",
+          msisdn,
+          requestPayload: chargingRequest,
+          responsePayload: chargingResponse.data,
+          serviceKey: service_api_key,
+        });
+      } catch (error) {
+        await saveApiLog({
+          apiName: "CallCenter-Charging-exception",
+          msisdn,
+          requestPayload: chargingRequest,
+          responsePayload: {
+            message: error.message,
+            code: error.code || "EXCEPTION",
+          },
+          serviceKey: service_api_key,
+        });
+      }
     }
     return true;
   } catch (error) {
@@ -70,7 +73,7 @@ export async function subscribeAndCharge(
     // EXCEPTION LOG
     // =========================
     await saveApiLog({
-      apiName: "Callcenter-exception",
+      apiName: "CallCenter-Subscribe-exception",
       msisdn,
       requestPayload: subscribeRequest,
       responsePayload: {
