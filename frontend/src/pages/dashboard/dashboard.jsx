@@ -183,6 +183,13 @@ export default function UploadFilePage() {
             <option value="Telo">Telo</option>
             <option value="Sybrid">Sybrid</option>
             <option value="Whatsapp">Whatsapp</option>
+            {/* Conditional centers for Ufone */}
+            {companies.find((c) => c.id == companyId)?.name === "Ufone" && (
+              <>
+                <option value="Technologist">Technologist</option>
+                <option value="Apexsolutions">Apexsolutions</option>
+              </>
+            )}
           </select>
         </div>
         {/* Drop Zone */}
