@@ -206,6 +206,8 @@ export default function UploadedFilesPage() {
           <option value="Telo">Telo</option>
           <option value="Sybrid">Sybrid</option>
           <option value="Whatsapp">Whatsapp</option>
+          <option value="Technologist">Technologist</option>
+          <option value="Apexsolutions">Apexsolutions</option>
         </select>
       </div>
 
