@@ -74,7 +74,8 @@ export const uploadAndProcess = async (req, res) => {
           campaign_id: row[2],
           center,
         };
-        company_name.toLowerCase().includes("ufone")
+        console.log("Processing payload:", company_name);
+        company_name.toLowerCase() === "ufone"
           ? await ufone_subscribeAndCharge(
               payload,
               service_api_key,
