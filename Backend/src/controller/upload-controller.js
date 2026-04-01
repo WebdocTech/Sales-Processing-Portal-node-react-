@@ -33,6 +33,7 @@
 import fs from "fs";
 import { readExcel } from "../services/excel-service.js";
 import { subscribeAndCharge } from "../services/subscribe-and-charge-service.js";
+import { ufone_subscribeAndCharge } from "../services/subscribe-and-charge-service-ufone.js";
 import { apiQueue } from "../services/queue-services.js";
 import {
   createSalesUpload,
@@ -43,7 +44,13 @@ import {
 import pool from "../config/db.js";
 export const uploadAndProcess = async (req, res) => {
   try {
-    const { service_id, service_api_id, center, service_api_key } = req.body;
+    const {
+      service_id,
+      service_api_id,
+      center,
+      service_api_key,
+      company_name,
+    } = req.body;
     const filePath = req.file.path;
     const filename = req.file.originalname;
 
@@ -67,19 +74,20 @@ export const uploadAndProcess = async (req, res) => {
           campaign_id: row[2],
           center,
         };
-
-        const success = await subscribeAndCharge(
-          payload,
-          service_api_key,
-          service_api_id
-        );
+        company_name.toLowerCase().includes("ufone")
+          ? await ufone_subscribeAndCharge(
+              payload,
+              service_api_key,
+              service_api_id,
+            )
+          : await subscribeAndCharge(payload, service_api_key, service_api_id);
 
         await incrementProcessedCount(uploadId);
 
         // 3️⃣ If all done → mark completed
         const [rowsCount] = await pool.query(
           `SELECT processed_count, total_count FROM sales_uploads WHERE id = ?`,
-          [uploadId]
+          [uploadId],
         );
 
         if (rowsCount[0].processed_count === rowsCount[0].total_count) {
