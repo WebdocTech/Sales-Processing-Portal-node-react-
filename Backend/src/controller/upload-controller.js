@@ -113,8 +113,9 @@ export const uploadAndProcess = async (req, res) => {
 };
 export const getUploadsByCenter = async (req, res) => {
   try {
-    const { center } = req.query;
-    const uploads = await getUploadByCenter(center);
+    const { center, service_id } = req.query;
+    console.log("Fetching uploads for center:", req.query);
+    const uploads = await getUploadByCenter(center, service_id);
 
     res.json({
       success: true,
