@@ -99,7 +99,7 @@ export default function UploadedFilesPage() {
     if (center) {
       fetchFiles();
     }
-  }, [center]);
+  }, [center, companyId, serviceId]);
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
