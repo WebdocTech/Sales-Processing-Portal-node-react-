@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import {
   CircleCheck,
@@ -11,17 +11,52 @@ import {
 } from "lucide-react";
 import { formatTo12Hour } from "../../helpers/date-formatter";
 import { BASE_URL } from "../../config";
+import { getAllCompanies, getAllServices } from "../../helpers/apis-helper";
 export default function UploadedFilesPage() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [companyId, setCompanyId] = useState("");
   const [center, setCenter] = useState("");
   const [initial, setInitial] = useState(true); // to prevent auto-fetch on first load
-
+  const [serviceId, setserviceId] = useState();
+  const [companyName, setCompanyName] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const [services, setServices] = useState([]);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const response = await getAllCompanies();
+      console.log("Companies fetched:", response);
+      if (response.success) {
+        setCompanies(response.data);
+      } else {
+        toast.error("Failed to fetch companies ");
+      }
+    };
+    fetchCompanies();
+  }, []);
 
+  const fetchServices = useCallback(
+    async (id) => {
+      const response = await getAllServices(id);
+      console.log("Services fetched:", response);
+      if (response.success) {
+        setServices(response.data);
+      } else {
+        toast.error("Failed to fetch services");
+      }
+    },
+    [companyId],
+  );
+  useEffect(() => {
+    if (companyId) {
+      fetchServices(companyId);
+    } else {
+      setServices([]);
+    }
+  }, [companyId]);
   const fetchFiles = async () => {
     if (!companyId) {
       setFiles([]);
@@ -31,7 +66,9 @@ export default function UploadedFilesPage() {
     try {
       setLoading(true);
 
-      const response = await fetch(`${BASE_URL}/upload?center=${companyId}`);
+      const response = await fetch(
+        `${BASE_URL}/upload?center=${center}&company_id=${companyId}&service_id=${serviceId}`,
+      );
 
       const data = await response.json();
 
@@ -59,10 +96,10 @@ export default function UploadedFilesPage() {
       setInitial(false);
       return;
     }
-    if (companyId) {
+    if (center) {
       fetchFiles();
     }
-  }, [companyId]);
+  }, [center]);
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -192,6 +229,67 @@ export default function UploadedFilesPage() {
       {/* Company Selection */}
       <div className="mb-6">
         <label className="block mb-2 font-medium text-gray-700">
+          Select Company
+        </label>
+        <select
+          value={companyId}
+          onChange={(e) => {
+            setCompanyId(e.target.value);
+            setCompanyName(e.target.options[e.target.selectedIndex].text);
+          }}
+          className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
+        >
+          <option value="">-- Choose a company --</option>
+          {/* <option value="4">Telo</option>
+            <option value="1">Sybrid</option> */}
+          {companies.map((company) => (
+            <option key={company.id} value={company.id} name={company.name}>
+              {company.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-6">
+        <label className="block mb-2 font-medium text-gray-700">
+          Select Service
+        </label>
+        <select
+          value={serviceId}
+          onChange={(e) => setserviceId(e.target.value)}
+          className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
+        >
+          <option value="">-- Choose a service --</option>
+          {services.map((service) => (
+            <option key={service.id} value={service.id}>
+              {service.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-6">
+        <label className="block mb-2 font-medium text-gray-700">
+          Select Center
+        </label>
+        <select
+          value={center}
+          onChange={(e) => setCenter(e.target.value)}
+          className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
+        >
+          <option value="">-- Choose Call center --</option>
+          <option value="Telo">Telo</option>
+          <option value="Sybrid">Sybrid</option>
+          <option value="Whatsapp">Whatsapp</option>
+          {/* Conditional centers for Ufone */}
+          {companies.find((c) => c.id == companyId)?.name === "Ufone" && (
+            <>
+              <option value="Technologist">Technologist</option>
+              <option value="Apexsolutions">Apexsolutions</option>
+            </>
+          )}
+        </select>
+      </div>
+      {/* <div className="mb-6">
+        <label className="block mb-2 font-medium text-gray-700">
           Select Center
         </label>
         <select
@@ -206,8 +304,10 @@ export default function UploadedFilesPage() {
           <option value="Telo">Telo</option>
           <option value="Sybrid">Sybrid</option>
           <option value="Whatsapp">Whatsapp</option>
+          <option value="Technologist">Technologist</option>
+          <option value="Apexsolutions">Apexsolutions</option>
         </select>
-      </div>
+      </div> */}
 
       {/* No company selected */}
       {!companyId ? (

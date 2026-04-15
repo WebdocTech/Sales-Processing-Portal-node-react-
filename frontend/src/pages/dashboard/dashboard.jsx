@@ -10,6 +10,7 @@ export default function UploadFilePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [serviceId, setserviceId] = useState();
   const [companyId, setCompanyId] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [center, setCenter] = useState("");
   const [companies, setCompanies] = useState([]);
   const [services, setServices] = useState([]);
@@ -66,6 +67,7 @@ export default function UploadFilePage() {
     formData.append("service_api_id", selectedService.service_api_id);
     formData.append("service_api_key", selectedService.service_api_key);
     formData.append("service_id", serviceId);
+    formData.append("company_name", companyName);
     try {
       setIsUploading(true);
 
@@ -140,14 +142,17 @@ export default function UploadFilePage() {
           </label>
           <select
             value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
+            onChange={(e) => {
+              setCompanyId(e.target.value);
+              setCompanyName(e.target.options[e.target.selectedIndex].text);
+            }}
             className="w-full p-3 border rounded-lg border-gray-300 focus:border-teal-500 focus:ring focus:ring-teal-100"
           >
             <option value="">-- Choose a company --</option>
             {/* <option value="4">Telo</option>
             <option value="1">Sybrid</option> */}
             {companies.map((company) => (
-              <option key={company.id} value={company.id}>
+              <option key={company.id} value={company.id} name={company.name}>
                 {company.name}
               </option>
             ))}

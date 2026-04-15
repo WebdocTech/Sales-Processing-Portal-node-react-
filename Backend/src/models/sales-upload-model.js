@@ -14,7 +14,7 @@ export async function createSalesUpload({
     (filename, file_path, center, service_id, service_api_key, total_count)
     VALUES (?, ?, ?, ?, ?, ?)
     `,
-    [filename, filePath, center, service_id, service_api_key, total_count]
+    [filename, filePath, center, service_id, service_api_key, total_count],
   );
 
   return result.insertId;
@@ -27,7 +27,7 @@ export async function incrementProcessedCount(uploadId) {
     SET processed_count = processed_count + 1
     WHERE id = ?
     `,
-    [uploadId]
+    [uploadId],
   );
 }
 
@@ -39,7 +39,7 @@ export async function markUploadCompleted(uploadId) {
         completed_at = NOW()
     WHERE id = ?
     `,
-    [uploadId]
+    [uploadId],
   );
 }
 
@@ -50,18 +50,18 @@ export async function markUploadFailed(uploadId) {
     SET status = 'failed'
     WHERE id = ?
     `,
-    [uploadId]
+    [uploadId],
   );
 }
 
-export async function getUploadByCenter(center) {
+export async function getUploadByCenter(center, service_id) {
   const [rows] = await pool.query(
     `
     SELECT *
     FROM sales_uploads
-    WHERE center = ?
+    WHERE center = ? AND service_id = ?
     `,
-    [center]
+    [center, service_id],
   );
   return rows;
 }
