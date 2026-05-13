@@ -339,6 +339,21 @@ export default function UploadedFilesPage() {
                   <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
                     Total Count
                   </th>
+                  {/* <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
+                    Processed Count
+                  </th> */}
+                  <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
+                    Charging Success Count
+                  </th>
+                  <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
+                    Charging Failed Count
+                  </th>
+                  <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
+                    Subscription Success Count
+                  </th>
+                  <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
+                    Subscription Failed Count
+                  </th>
                   <th className="p-2 md:px-6 md:py-3 text-center text-xs md:text-md xl:text-base font-semibold">
                     Processed Count
                   </th>
@@ -364,6 +379,18 @@ export default function UploadedFilesPage() {
                     </td>
                     <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
                       {file.total_count}
+                    </td>
+                    <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
+                      {file.charging_success_count}
+                    </td>
+                    <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
+                      {file.charging_failed_count}
+                    </td>
+                    <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
+                      {file.subscription_success_count}
+                    </td>
+                    <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
+                      {file.subscription_failed_count}
                     </td>
                     <td className="p-3 md:px-4 md:py-3 font-medium text-xs md:text-md xl:text-base text-center text-gray-600">
                       {file.processed_count}

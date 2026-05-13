@@ -7,7 +7,7 @@ export default function MainLayout() {
       <ProfileHeader />
       <div className="flex flex-row flex-1">
         <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-4 overflow-y-auto">
           <Outlet />
         </main>
       </div>

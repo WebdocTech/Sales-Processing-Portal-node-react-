@@ -80,8 +80,14 @@ export const uploadAndProcess = async (req, res) => {
               payload,
               service_api_key,
               service_api_id,
+              uploadId,
             )
-          : await subscribeAndCharge(payload, service_api_key, service_api_id);
+          : await subscribeAndCharge(
+              payload,
+              service_api_key,
+              service_api_id,
+              uploadId,
+            );
 
         await incrementProcessedCount(uploadId);
 

@@ -41,7 +41,46 @@ export async function incrementProcessedCount(uploadId) {
     [uploadId],
   );
 }
-
+export async function incrementChargingSuccessCount(uploadId) {
+  await pool.query(
+    `
+    UPDATE sales_uploads
+    SET charging_success_count = charging_success_count + 1
+    WHERE id = ?
+    `,
+    [uploadId],
+  );
+}
+export async function incrementChargingFailedCount(uploadId) {
+  await pool.query(
+    `
+    UPDATE sales_uploads
+    SET charging_failed_count = charging_failed_count + 1
+    WHERE id = ?
+    `,
+    [uploadId],
+  );
+}
+export async function incrementSubscriptionSuccessCount(uploadId) {
+  await pool.query(
+    `
+    UPDATE sales_uploads
+    SET subscription_success_count = subscription_success_count + 1
+    WHERE id = ?
+    `,
+    [uploadId],
+  );
+}
+export async function incrementSubscriptionFailedCount(uploadId) {
+  await pool.query(
+    `
+    UPDATE sales_uploads
+    SET subscription_failed_count = subscription_failed_count + 1
+    WHERE id = ?
+    `,
+    [uploadId],
+  );
+}
 export async function markUploadCompleted(uploadId) {
   const completedAt = new Date().toLocaleString("sv-SE", {
     timeZone: "Asia/Karachi",
@@ -80,6 +119,10 @@ export async function getUploadByCenter(center, service_id) {
     service_api_key,
     total_count,
     processed_count,
+    charging_success_count,
+    charging_failed_count,
+    subscription_success_count,
+    subscription_failed_count,
     status,
     DATE_FORMAT(uploaded_at, '%Y-%m-%d %H:%i:%s') as uploaded_at,
     DATE_FORMAT(completed_at, '%Y-%m-%d %H:%i:%s') as completed_at

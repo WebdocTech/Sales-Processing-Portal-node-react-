@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom"; // Import useLocation
 
 export default function Sidebar() {
   return (
-    <div className="w-28 lg:w-56 bg-white text-black flex flex-col shadow-xl border-r border-r-gray-300">
+    <div className="w-28 lg:w-48 bg-white text-black flex flex-col shadow-xl border-r border-r-gray-300">
       {/* Menu Items */}
       <nav className="flex-1 px-2 lg:px-5 pt-10 space-y-3">
         <SidebarItem
