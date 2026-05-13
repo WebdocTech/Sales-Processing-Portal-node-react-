@@ -4,6 +4,7 @@ export async function ufone_subscribeAndCharge(
   payload,
   service_api_key,
   service_api_id,
+  uploadId,
 ) {
   const msisdn = `0${payload.msisdn}`;
   const subscribeRequest = {

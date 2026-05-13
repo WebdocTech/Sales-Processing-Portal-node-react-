@@ -1,9 +1,17 @@
 import axios from "axios";
 import { saveApiLog } from "./api-logs-service.js";
+import {
+  incrementSubscriptionSuccessCount,
+  incrementSubscriptionFailedCount,
+  incrementChargingFailedCount,
+  incrementChargingSuccessCount,
+} from "../models/sales-upload-model.js";
+
 export async function subscribeAndCharge(
   payload,
   service_api_key,
   service_api_id,
+  uploadId,
 ) {
   const msisdn = `0${payload.msisdn}`;
   const subscribeRequest = {
@@ -37,6 +45,8 @@ export async function subscribeAndCharge(
       subscribeResponse.data.responseCode === 100 &&
       subscribeResponse.data.IS_SUBSCRIBED === "Y"
     ) {
+      await incrementSubscriptionSuccessCount(uploadId);
+
       const chargingRequest = { cellno: msisdn };
       try {
         const chargingResponse = await axios.get(
@@ -46,7 +56,11 @@ export async function subscribeAndCharge(
             timeout: 60000,
           },
         );
-
+        if (chargingResponse.data === 100) {
+          await incrementChargingSuccessCount(uploadId);
+        } else {
+          await incrementChargingFailedCount(uploadId);
+        }
         await saveApiLog({
           apiName: "CallCenter-Charging",
           msisdn,
@@ -55,6 +69,7 @@ export async function subscribeAndCharge(
           serviceKey: service_api_key,
         });
       } catch (error) {
+        await incrementChargingFailedCount(uploadId);
         await saveApiLog({
           apiName: "CallCenter-Charging-exception",
           msisdn,
@@ -66,12 +81,16 @@ export async function subscribeAndCharge(
           serviceKey: service_api_key,
         });
       }
+    } else {
+      await incrementSubscriptionFailedCount(uploadId);
     }
     return true;
   } catch (error) {
     // =========================
     // EXCEPTION LOG
     // =========================
+    await incrementSubscriptionFailedCount(uploadId);
+
     await saveApiLog({
       apiName: "CallCenter-Subscribe-exception",
       msisdn,

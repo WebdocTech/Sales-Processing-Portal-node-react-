@@ -1,10 +1,8 @@
 export const formatTo12Hour = (dateString) => {
   if (!dateString) return "—";
 
-  const date = new Date(dateString);
-  if (isNaN(date)) return dateString; // fallback
-
-  return date.toLocaleString("en-US", {
+  return new Date(dateString.replace(" ", "T")).toLocaleString("en-PK", {
+    timeZone: "Asia/Karachi",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
