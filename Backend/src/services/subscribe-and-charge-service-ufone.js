@@ -1,5 +1,9 @@
 import axios from "axios";
 import { saveApiLog } from "./api-logs-service.js";
+import {
+  incrementSubscriptionSuccessCount,
+  incrementSubscriptionFailedCount,
+} from "../models/sales-upload-model.js";
 export async function ufone_subscribeAndCharge(
   payload,
   service_api_key,
@@ -27,7 +31,7 @@ export async function ufone_subscribeAndCharge(
 
     // 🔹 LOG SUBSCRIBE RESPONSE
     await saveApiLog({
-      apiName: "CallCenter-Subscribe",
+      apiName: "CallCenter-Subscribe-Ufone",
       msisdn,
       requestPayload: subscribeRequest,
       responsePayload: subscribeResponse.data,
@@ -38,43 +42,44 @@ export async function ufone_subscribeAndCharge(
       subscribeResponse.data.responseCode === 100 &&
       subscribeResponse.data.IS_SUBSCRIBED === "Y"
     ) {
-      const chargingRequest = { cellno: msisdn };
-      try {
-        const chargingResponse = await axios.get(
-          `${process.env.THIRD_PARTY_API}/${service_api_key}/charging`,
-          {
-            params: chargingRequest,
-            timeout: 60000,
-          },
-        );
-
-        await saveApiLog({
-          apiName: "CallCenter-Charging",
-          msisdn,
-          requestPayload: chargingRequest,
-          responsePayload: chargingResponse.data,
-          serviceKey: service_api_key,
-        });
-      } catch (error) {
-        await saveApiLog({
-          apiName: "CallCenter-Charging-exception",
-          msisdn,
-          requestPayload: chargingRequest,
-          responsePayload: {
-            message: error.message,
-            code: error.code || "EXCEPTION",
-          },
-          serviceKey: service_api_key,
-        });
-      }
+      await incrementSubscriptionSuccessCount(uploadId);
+      //   const chargingRequest = { cellno: msisdn };
+      //   try {
+      //     const chargingResponse = await axios.get(
+      //       `${process.env.THIRD_PARTY_API}/${service_api_key}/charging`,
+      //       {
+      //         params: chargingRequest,
+      //         timeout: 60000,
+      //       },
+      //     );
+      //     await saveApiLog({
+      //       apiName: "CallCenter-Charging",
+      //       msisdn,
+      //       requestPayload: chargingRequest,
+      //       responsePayload: chargingResponse.data,
+      //       serviceKey: service_api_key,
+      //     });
+      //   } catch (error) {
+      //     await saveApiLog({
+      //       apiName: "CallCenter-Charging-exception",
+      //       msisdn,
+      //       requestPayload: chargingRequest,
+      //       responsePayload: {
+      //         message: error.message,
+      //         code: error.code || "EXCEPTION",
+      //       },
+      //       serviceKey: service_api_key,
+      //     });
+      //   }
     }
     return true;
   } catch (error) {
     // =========================
     // EXCEPTION LOG
     // =========================
+    await incrementSubscriptionFailedCount(uploadId);
     await saveApiLog({
-      apiName: "CallCenter-Subscribe-exception",
+      apiName: "CallCenter-Subscribe-Ufone-exception",
       msisdn,
       requestPayload: subscribeRequest,
       responsePayload: {
