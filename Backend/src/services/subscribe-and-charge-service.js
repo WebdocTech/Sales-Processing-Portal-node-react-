@@ -16,7 +16,7 @@ export async function subscribeAndCharge(
   const msisdn = `0${payload.msisdn}`;
   const subscribeRequest = {
     cellno: msisdn,
-    subMode: "WEB",
+    subMode: "ZONG_CC",
     serviceId: service_api_id,
   };
 
